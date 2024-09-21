@@ -9,7 +9,8 @@ image_url = "https://d2e931syjhr5o9.cloudfront.net/playground_uploads/e172d34b-9
 
 def image_to_text(image_url):
     headers = {
-        "Authorization": "sk-tune-ihOAWpXjjsdEv4XeD6D6LA0joqJLU80SAEm",
+        #"Authorization": "sk-tune-ihOAWpXjjsdEv4XeD6D6LA0joqJLU80SAEm",
+        "Authorization: sk-tune-Y9MwiV5Z1gjHPYlrqmDUHZt7GCSfgsxNsBd"
         "Content-Type": "application/json",
         "X-Org-Id": "8dfdb00c-7f43-45fe-abf9-477b7089962b"
     }

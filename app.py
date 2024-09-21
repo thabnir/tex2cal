@@ -4,9 +4,6 @@ from werkzeug.utils import secure_filename
 from fancy_ai import CalendarAssistant
 import os
 from img_to_text import image_to_text, image_to_base64
-import ssl
-# from certifi import urllib.request
-# import urlopen 
 
 app = Flask(__name__)
 
@@ -367,14 +364,3 @@ def submit():
         )
 
     return "No file uploaded", 400
-
-
-def tex2calopenaigipity():
-    return "advanced ai algorithms"
-
-
-# path = "/Users/thabnir/code/tex2cal/uploads/poster.jpg"
-# b64 = image_to_base64(path)
-# ocr = image_to_text(b64)
-
-# print(ocr)

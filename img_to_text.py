@@ -63,11 +63,19 @@ def image_to_text(image_url):
     deadlines = response.json()['choices'][0]['message']['content'].split('\n')[0:-1]
     return deadlines
 
-image_url = image_to_base64("Weixin Image_20240921170839.jpg")
-#print(image_url)
-deadlines = image_to_text(image_url)
+def image_to_events(img_path):
+    img_64 = image_to_base64(img_path)
+    deadlines = image_to_text(img_64)
 
-# Print the extracted deadlines
-for deadline in deadlines:
-    print(deadline)
+    # Print the extracted deadlines
+    list_of_deadlines = []
+    for deadline in deadlines:
+        list_of_deadlines.append(deadline)
+        print(deadline)
+
+    return list_of_deadlines
+
+# image_to_events("Weixin Image_20240921170839.jpg")
+
+
 

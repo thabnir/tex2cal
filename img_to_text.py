@@ -1,7 +1,4 @@
 import base64
-from PIL import Image
-import io
-import json
 import requests
 
 def image_to_base64(image_path):
@@ -58,10 +55,9 @@ def image_to_text(image_url):
         pass
         #print(response.json())
 
-    #print(response.json())
 
-    deadlines = response.json()['choices'][0]['message']['content'].split('\n')[0:-1]
-    return deadlines
+    extracted_info = response.json()['choices'][0]['message']["content"]
+    return extracted_info
 
 def image_to_events(img_path):
     img_64 = image_to_base64(img_path)

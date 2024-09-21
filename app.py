@@ -346,25 +346,18 @@ def submit():
         file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         file.save(file_path)
 
-        # Extract text using OCR (Tesseract)
-        # TODO: Implement OCR
-        # img = Image.open(file_path)
-        print(f"File path: {file_path}")
-
         base64_img = image_to_base64(file_path)
-        ocr_text_array = image_to_text(base64_img)
-        ocr_text_array = ocr_text_array.split("\n")
-        print(f"OCR Text: `{ocr_text_array}`")
+        ocr_text = image_to_text(base64_img)
 
         # Get the optional prompt from the user
         prompt = request.form.get("prompt", "")
-        # return send_file(path_or_file=BytesIO(sample_output.encode()), as_attachment=True, download_name="calendar.ics")
 
         # Use CalendarAssistant to convert text into a .ics file
         cal_assistant = CalendarAssistant()
         cal_assistant.handle_user_message(ocr_text)
+        print(f"OCR'd text: `{ocr_text}`")
         if prompt:
-            cal_assistant.handle_user_message(prompt)  # Handle any prompt-related logic
+            cal_assistant.handle_user_message(ocr_text)  # Handle any prompt-related logic
         ics_file = BytesIO(cal_assistant.to_ical_bytes())
         calendar_name = cal_assistant.calendar_name
 

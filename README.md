@@ -1,1 +1,1 @@
-# Build for PennApps 2024
+# Built for PennApps 2024

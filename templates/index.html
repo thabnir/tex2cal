@@ -1,12 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>tex2cal</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image/Text to Calendar Converter</title>
 </head>
+
 <body>
-    <h1>Tex2cal</h1>
-    <p>Hello</p>
+  <h1>Upload an Image to Convert into Calendar Events</h1>
+  <form action="/submit" method="POST" enctype="multipart/form-data">
+    <label for="image">Select an image (JPEG/PNG):</label><br />
+    <input type="file" id="image" name="image" accept="image/*" required /><br /><br />
+    <label for="prompt">Optional: Enter any additional prompt or details:</label><br />
+    <textarea id="prompt" name="prompt" rows="4" cols="50"></textarea><br /><br />
+    <button type="submit">Convert to Calendar</button>
+  </form>
 </body>
+
 </html>

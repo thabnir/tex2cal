@@ -2,6 +2,7 @@ import json
 import requests
 
 #TODO have a thing that turns pdf into image
+#TODO: finetune the model
 
 url = "https://proxy.tune.app/chat/completions"
 image_url = "https://d2e931syjhr5o9.cloudfront.net/playground_uploads/e172d34b-97ef-4499-8e43-5c6c18995ad4"

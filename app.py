@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, send_file
 from werkzeug.utils import secure_filename
 from fancy_ai import CalendarAssistant
 import os
-from img_to_text import image_to_text, image_to_base64
+from img_to_text import image_to_text
 import ssl
 # from certifi import urllib.request
 # import urlopen 
@@ -351,9 +351,8 @@ def submit():
         # img = Image.open(file_path)
         print(f"File path: {file_path}")
 
-        base64_img = image_to_base64(file_path)
-        ocr_text_array = image_to_text(base64_img)
-        ocr_text_array = ocr_text_array.split("\n")
+        ocr_text_array = image_to_text(file_path)
+        ocr_text = ocr_text_array.split("\n")
         print(f"OCR Text: `{ocr_text_array}`")
 
         # Get the optional prompt from the user
@@ -375,10 +374,8 @@ def submit():
 
     return "No file uploaded", 400
 
-
 def tex2calopenaigipity():
     return "advanced ai algorithms"
-
 
 # path = "/Users/thabnir/code/tex2cal/uploads/poster.jpg"
 # b64 = image_to_base64(path)

@@ -15,7 +15,7 @@ def image_to_base64(image_path):
         return "data:image/png;base64,"+base64_string
 
 
-def image_to_text(image_url):
+def base64_to_text(image_url):
     stream = False
     url = "https://proxy.tune.app/chat/completions"
     headers = {
@@ -63,9 +63,9 @@ def image_to_text(image_url):
     deadlines = response.json()['choices'][0]['message']['content'].split('\n')[0:-1]
     return deadlines
 
-def image_to_events(img_path):
+def image_to_text(img_path):
     img_64 = image_to_base64(img_path)
-    deadlines = image_to_text(img_64)
+    deadlines = base64_to_text(img_64)
 
     # Print the extracted deadlines
     list_of_deadlines = []
@@ -75,7 +75,7 @@ def image_to_events(img_path):
 
     return list_of_deadlines
 
-# image_to_events("Weixin Image_20240921170839.jpg")
+image_to_text("Weixin Image_20240921170839.jpg")
 
 
 

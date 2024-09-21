@@ -1,121 +1,95 @@
-import base64
 import json
-import random
-import openai
 from openai import OpenAI
-from io import BytesIO
-from typing import List
 from icalendar import Calendar, Event
 from datetime import datetime
-from pytz import UTC  # timezone handling
+from pytz import UTC
+
+# dotenv for openai key
+
+from dotenv import load_dotenv
+load_dotenv()
 
 
 class CalendarAssistant:
-    def __init__(self):
-        # name, class
-        self.users: List[tuple[str, str]] = []
-        self.client: OpenAI
+    def __init__(self, calendar: Calendar = Calendar()):
+        self.client = OpenAI()
         self.messages = []
-
-        self.content = []  # contains story content + images in base64 in order + with character labels
-
         self.tools = []
 
-        self.character_1_health: int
-        self.character_1_class: str
-        self.character_1_name: str
+        # this is a dictionary of functions that the AI can call
+        self.available_functions = {"add_event_to_calendar": add_event_to_calendar}
 
-        self.character_2_health: int
-        self.character_2_class: str
-        self.character_2_name: str
+        self.calendar = calendar  # start with a blank calendar
 
-        self.is_started: bool = False
-
-    def get_messages(self):
-        return self.messages
-
-    def get_last_message(self):
-        return self.messages[-1]
-
-    def setup(self):
-        # this should probably inside the constructor
-        self.client = OpenAI()
-
-        self.available_functions = {"deal_damage": self.deal_damage}
         self.messages = [
             {
                 "role": "system",
-                "content": f"You are a calendar-creating assistant. Take the input text and generate a calendar.",
+                # todo: make current year next year next year
+                "content": f"You are a calendar-creating assistant. Take the input text and generate a calendar. The current year is 2024.",
             },
         ]
         self.tools = [
             {
                 "type": "function",
                 "function": {
-                    "name": "deal_damage",
-                    "description": "Deal the specified integer damage value to character `name.` Max health is 100",
+                    "name": "add_event_to_calendar",
+                    # todo: figure out the right prompt for this
+                    "description": "Add a new event to the existing calendar. Enter times in the calendar's timezone.",
                     "parameters": {
                         "type": "object",
                         "properties": {
-                            "name": {
-                                "type": "string",  # TODO: check if this should be an ID instead of a name. Tests needed
-                                "description": "The name of the character whose health value is being updated",
+                            "summary": {
+                                "type": "string",
+                                "description": "The name of the event to add to the calendar.",
                             },
-                            "damage_amount": {
-                                "type": "integer",
-                                "description": "The amount the character's health is being decreased by. Negative values will increase the character's health.",
+                            "description": {
+                                "type": "string",
+                                "description": "A description of the event. Optional.",
                             },
+                            "start_time": {
+                                "type": "string",  # datetime parsing stuff necessary
+                                "description": "The time the event starts.",
+                            },
+                            "end_time": {
+                                "type": "string",  # datetime parsing stuff necessary
+                                "description": "The time the event starts.",
+                            },
+                            "location": {
+                                "type": "string",
+                                "description": "The location of the event. Optional.",
+                            },
+                            # should this even be given to the ai? maybe just have it as a default value specified by the user
+                            # guessing whose email to use is kinda stupid
+                            # "organizer_email": {
+                            #     "type": "string",
+                            #     "description": "The email of the event organizer. Optional.",
+                            # },
+                            # todo: add other stuff so it matches
                         },
-                        "required": ["name", "damage_amount"],
+                        "required": ["summary", "start_time", "end_time"],
                     },
                 },
             },
         ]
 
-        prompt = ""
-
-    def generate_story(
+    def query_ai(
         self,
         prompt: str,
         role="user",
     ):
+        # TODO: use streaming to make it faster / more responsive
         self.messages.append({"role": role, "content": prompt})
         response = self.client.chat.completions.create(
             model="gpt-4o",
             messages=self.messages,
             tools=self.tools,
             tool_choice="auto",
+            parallel_tool_calls=True,  # TODO test this, could be handy
         )
         return response
 
-    def deal_damage(self, name: str, damage_amount: int):
-        if name == self.character_1_name:
-            self.character_1_health -= damage_amount
-        elif name == self.character_2_name:
-            self.character_2_health -= damage_amount
-        else:
-            raise ValueError(f"Character name {name} not found")
-        print(f"{name} took {damage_amount} damage")
-        # print heatlh
-        print(f"{self.character_1_name} has {self.character_1_health} health")
-        print(f"{self.character_2_name} has {self.character_2_health} health")
-        if self.character_1_health <= 0:
-            print(f"{self.character_1_name} has been defeated!")
-            return self.character_2_name
-        elif self.character_2_health <= 0:
-            print(f"{self.character_2_name} has been defeated!")
-            return self.character_1_name
-
-    def user_submit_message(self, message: str, char_name: str):
-        prompt = f"{char_name}: {message} [HIDDEN SYSTEM MESSAGE: ROLLED A {random.randint(1, 20)}]"  # TODO: remove the random roll or make it visible to the user
-        userContent = {
-            "name": char_name,
-            "content": message,
-            "base64_image": None,
-        }
-        self.content.append(userContent)
-
-        response = self.generate_story(prompt)
+    def handle_user_message(self, message: str):
+        response = self.query_ai(message)
         top_response = response.choices[0].message
 
         tool_calls = top_response.tool_calls
@@ -128,58 +102,133 @@ class CalendarAssistant:
                     print(
                         f"Calling function `{function_name}` with args `{function_args}`"
                     )
-                    function_to_call(**function_args)
+                    if function_to_call is not None:
+                        if function_to_call == add_event_to_calendar:
+                            # add the event to the existing calendar
+                            parsed_args = parse_ai_function_args(function_args)
+                            add_event_to_calendar(self.calendar, **parsed_args)
+                        else:
+                            function_to_call(**function_args)
                 except:  # probably a value error tbh
                     print(
                         f"Error calling function `{function_name}` with args `{function_args}`"
                     )
                     continue
         if top_response.content is not None:
-            b64_img = self.generate_image_multitry_content(top_response.content)
-            narratorContent = {
-                "name": "Narrator",
-                "content": top_response.content,
-                "base64_image": b64_img,
-            }
-            self.content.append(narratorContent)
+            # non-function text output from the AI
+            # figure out how to display this/what to do with it
+            print(top_response.content)
         else:
-            print("ERROR: No content generated")
+            print("Bing bong! No text content in response")
 
-def create_calendar_event(summary, description, location, start_time, end_time, organizer_email):
-    # Create a new calendar
-    cal = Calendar()
 
-    # Create a new event
+def parse_ai_function_args(args: dict) -> dict:
+    # convert the string datetime to a datetime object
+    args["start_time"] = datetime.fromisoformat(args["start_time"])
+    args["end_time"] = datetime.fromisoformat(args["end_time"])
+    return args
+
+
+# TODO: make sure that it doesn't copy the calendar every time, and instead modifies the input calendar in place
+def add_event_to_calendar(
+    calendar: Calendar,
+    summary: str,
+    start_time: datetime,
+    end_time: datetime,
+    description: str = "",
+    location: str = "",
+    organizer_email: str = "",
+) -> str:
+    """
+    Adds an event to the calendar. Returns a string representation of the calendar in iCalendar format.
+
+    Parameters:
+        calendar (Calendar): The calendar to add the event to.
+        summary (str): The summary or title of the event.
+        start_time (datetime): The start time of the event.
+        end_time (datetime): The end time of the event.
+        description (str, optional): The description of the event. Defaults to an empty string.
+        location (str, optional): The location of the event. Defaults to an empty string.
+        organizer_email (str, optional): The email address of the event organizer. Defaults to an empty string.
+
+    Returns:
+        str: The calendar in iCalendar format as a string.
+    """
     event = Event()
-    event.add('summary', summary)
-    event.add('description', description)
-    event.add('location', location)
-    event.add('dtstart', start_time)
-    event.add('dtend', end_time)
-    event.add('dtstamp', datetime.now(UTC))
-    event.add('organizer', organizer_email)
+    event.add("summary", summary)
+    event.add("dtstart", start_time)
+    event.add("dtend", end_time)
 
-    # Add event to calendar
-    cal.add_component(event)
+    event.add(
+        "dtstamp", datetime.now(UTC)
+    )  # used for when the event was added to the calendar
+
+    if description:
+        event.add("description", description)
+    if location:
+        event.add("location", location)
+    if organizer_email:
+        event.add("organizer", organizer_email)
+
+    # maybe add some validation here?
+    # to remove any obviously incorrect events, e.g. end_time < start_time
+    if end_time < start_time:
+        return "Error: end time is before start time."
+    calendar.add_component(event)
 
     # Convert the calendar to string in iCalendar format
-    return cal.to_ical().decode('utf-8')
+    # can use this return value if you want
+    return calendar.to_ical().decode("utf-8")
+
 
 # Example usage
-start_time = datetime(2024, 10, 1, 10, 0, tzinfo=UTC)  # Event start time
-end_time = datetime(2024, 10, 1, 11, 0, tzinfo=UTC)  # Event end time
+# start_time = datetime(2024, 10, 1, 10, 0, tzinfo=UTC)  # Event start time
+# end_time = datetime(2024, 10, 1, 11, 0, tzinfo=UTC)  # Event end time
 
-calendar_data = create_calendar_event(
-    summary="Team Meeting",
-    description="Discussion on project progress",
-    location="Conference Room 1",
-    start_time=start_time,
-    end_time=end_time,
-    organizer_email="organizer@example.com"
-)
+# cal = Calendar()
 
-print(calendar_data)
+# calendar_data = add_event_to_calendar(
+#     calendar=cal,
+#     summary="Team Meeting",
+#     description="Discussion on project progress",
+#     location="Conference Room 1",
+#     start_time=start_time,
+#     end_time=end_time,
+#     organizer_email="organizer@example.com",
+# )
+
+# print(cal.to_ical().decode("utf-8"))
+# print(calendar_data)
 
 # Write the calendar data to a file
-with open('meeting.ics', 'w') as f:
-    f.write(calendar_data)
+# with open("meeting.ics", "w") as f:
+#     f.write(calendar_data)
+
+example_str = """
+Sep 12 - OS Shell Assignment Released
+Sep 17 - Scheduling Assignment Released
+Oct 3 - Virtual Memory (2/3)
+Oct 10 - Mid-semester Q&A (no lab)
+Oct 15 - Graded Exercises Released
+Oct 18 - A1 Graded
+Oct 24 - OS Shell Assignment Due
+Oct 25 - A2 Graded
+Nov 7 - Gradied Exercises Due
+Nov 14 - Exercises Graded
+Nov 28 - A3 Graded
+Dec 3 - End-of-Semester Q&A (Final class)
+Dec 6 - Last class
+Dec 8 - Memory Management Assign. Due
+Dec 9 - A4 Graded
+Dec 14 - Midterm Exam Grade Posted
+"""
+
+cal_assistant = CalendarAssistant()
+
+# take this hsit and turn it into a calendar. should parse the whole thing as one chunk.
+x = cal_assistant.handle_user_message(example_str)
+
+cal_txt = cal_assistant.calendar.to_ical().decode("utf-8")
+
+with open("calendar.ics", "w") as f:
+    f.write(cal_txt)

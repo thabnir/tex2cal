@@ -1,11 +1,8 @@
-import pytesseract
-from google.cloud import vision
-
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-
 import base64
 from PIL import Image
 import io
+import json
+import requests
 
 def image_to_base64(image_path):
     with open(image_path, "rb") as image_file:
@@ -16,45 +13,6 @@ def image_to_base64(image_path):
         # Convert bytes to string
         base64_string = base64_encoded_data.decode('utf-8')
         return "data:image/png;base64,"+base64_string
-
-def detect_text(path):
-    """Detects text in the file."""
-    #from google.cloud import vision
-
-    client = vision.ImageAnnotatorClient()
-
-    with open(path, "rb") as image_file:
-        content = image_file.read()
-
-    image = vision.Image(content=content)
-
-    response = client.text_detection(image=image)
-    texts = response.text_annotations
-    print("Texts:")
-
-    for text in texts:
-        print(f'\n"{text.description}"')
-
-        vertices = [
-            f"({vertex.x},{vertex.y})" for vertex in text.bounding_poly.vertices
-        ]
-
-        print("bounds: {}".format(",".join(vertices)))
-
-    if response.error.message:
-        raise Exception(
-            "{}\nFor more info on error messages, check: "
-            "https://cloud.google.com/apis/design/errors".format(response.error.message)
-        )
-
-import json
-import requests
-
-#TODO have a thing that turns pdf into image
-#TODO: finetune the model
-
-url = "https://proxy.tune.app/chat/completions"
-image_url = "https://d2e931syjhr5o9.cloudfront.net/playground_uploads/e172d34b-97ef-4499-8e43-5c6c18995ad4"
 
 
 def image_to_text(image_url):
@@ -105,13 +63,11 @@ def image_to_text(image_url):
     deadlines = response.json()['choices'][0]['message']['content'].split('\n')[0:-1]
     return deadlines
 
-
-image_url = "https://d2e931syjhr5o9.cloudfront.net/playground_uploads/0193c73f-8e4c-4dfe-a940-14ba635c023b"
-image_url = image_to_base64("pennapps_friday.png")
+image_url = image_to_base64("Weixin Image_20240921170839.jpg")
 #print(image_url)
 deadlines = image_to_text(image_url)
+
 # Print the extracted deadlines
 for deadline in deadlines:
     print(deadline)
-#print(image_to_text("blackboard_2.jpg"))
-#detect_text("Detailed_Schedule_COMP310-F2024-23-8.jpg")
+

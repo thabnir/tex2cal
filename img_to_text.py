@@ -71,7 +71,4 @@ def image_to_events(img_path):
 
     return list_of_deadlines
 
-image_to_events("pennapps_friday.png")
-
-
 

@@ -1,9 +1,11 @@
+import base64
 from io import BytesIO
 from flask import Flask, render_template, request, send_file
 from werkzeug.utils import secure_filename
 from fancy_ai import CalendarAssistant
 import os
 from img_to_text import image_to_text, image_to_base64
+from PIL import Image
 
 app = Flask(__name__)
 
@@ -18,349 +20,70 @@ def hello_world():
     return render_template("index.html")
 
 
-sample_output = """
-BEGIN:VCALENDAR
-BEGIN:VEVENT
-SUMMARY:Bag Check
-DTSTART;TZID=America/New_York:20240920T140000
-DTEND;TZID=America/New_York:20240920T150000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.663662+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Hacker Check-in
-DTSTART;TZID=America/New_York:20240920T150000
-DTEND;TZID=America/New_York:20240920T170000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.663803+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Sponsor/Mentor Check-in
-DTSTART;TZID=America/New_York:20240920T150000
-DTEND;TZID=America/New_York:20240920T173000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.663864+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Opening Ceremony
-DTSTART;TZID=America/New_York:20240920T170000
-DTEND;TZID=America/New_York:20240920T190000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.663903+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Mentorship Lounge Opens
-DTSTART;TZID=America/New_York:20240920T190000
-DTEND;TZID=America/New_York:20240920T193000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.663932+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Diversity Fellows Welcome Event
-DTSTART;TZID=America/New_York:20240920T190000
-DTEND;TZID=America/New_York:20240920T193000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.663961+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Sponsor Fair
-DTSTART;TZID=America/New_York:20240920T190000
-DTEND;TZID=America/New_York:20240920T210000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664041+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Hardware Lab Open
-DTSTART;TZID=America/New_York:20240920T190000
-DTEND;TZID=America/New_York:20240920T213000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664113+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Dinner
-DTSTART;TZID=America/New_York:20240920T193000
-DTEND;TZID=America/New_York:20240920T203000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664151+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Team Formation
-DTSTART;TZID=America/New_York:20240920T203000
-DTEND;TZID=America/New_York:20240920T213000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664179+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Hacking Begins
-DTSTART;TZID=America/New_York:20240920T210000
-DTEND;TZID=America/New_York:20240920T220000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664214+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Patient Safety 101
-DTSTART;TZID=America/New_York:20240920T210000
-DTEND;TZID=America/New_York:20240920T220000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664241+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Building ChatGPT... But You Tester with Cerebras API
-DTSTART;TZID=America/New_York:20240920T213000
-DTEND;TZID=America/New_York:20240920T223000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664268+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Mario Kart Tournament
-DTSTART;TZID=America/New_York:20240920T220000
-DTEND;TZID=America/New_York:20240920T230000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664297+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Air Mattress Checkout
-DTSTART;TZID=America/New_York:20240920T220000
-DTEND;TZID=America/New_York:20240920T230000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664323+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Reading Room Opens
-DTSTART;TZID=America/New_York:20240920T230000
-DTEND;TZID=America/New_York:20240920T230000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664383+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Hardware Lab Open
-DTSTART;TZID=America/New_York:20240921T053000
-DTEND;TZID=America/New_York:20240921T190000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664430+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Penn Labs Presents: Intro to IOS
-DTSTART;TZID=America/New_York:20240921T083000
-DTEND;TZID=America/New_York:20240921T093000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664467+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Diversity Fellows - Guide to Networking Workshop
-DTSTART;TZID=America/New_York:20240921T093000
-DTEND;TZID=America/New_York:20240921T103000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664498+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Diversity Fellows Sponsor Networking Brunch
-DTSTART;TZID=America/New_York:20240921T103000
-DTEND;TZID=America/New_York:20240921T113000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664525+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Brunch
-DTSTART;TZID=America/New_York:20240921T103000
-DTEND;TZID=America/New_York:20240921T113000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664604+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Intro to Bloomberg
-DTSTART;TZID=America/New_York:20240921T113000
-DTEND;TZID=America/New_York:20240921T123000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664640+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Campus Tour
-DTSTART;TZID=America/New_York:20240921T114500
-DTEND;TZID=America/New_York:20240921T124500
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664669+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Hatz AI Workshop
-DTSTART;TZID=America/New_York:20240921T130000
-DTEND;TZID=America/New_York:20240921T140000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664696+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Roboflow Workshop
-DTSTART;TZID=America/New_York:20240921T130000
-DTEND;TZID=America/New_York:20240921T140000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664724+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Diversity Fellows - Career Panel
-DTSTART;TZID=America/New_York:20240921T134500
-DTEND;TZID=America/New_York:20240921T144500
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664753+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Mastering LLM Application Development with Fine Studio's TuringQ
-DTSTART;TZID=America/New_York:20240921T140000
-DTEND;TZID=America/New_York:20240921T150000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664787+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Wearable Gaming Session - SIG
-DTSTART;TZID=America/New_York:20240921T150000
-DTEND;TZID=America/New_York:20240921T160000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664832+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Build with Palantir
-DTSTART;TZID=America/New_York:20240921T160000
-DTEND;TZID=America/New_York:20240921T170000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.664884+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Intro to GPU Programming
-DTSTART;TZID=America/New_York:20240921T160000
-DTEND;TZID=America/New_York:20240921T170000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.665033+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Intro to GitHub Actions and CI/CD Development
-DTSTART;TZID=America/New_York:20240921T170000
-DTEND;TZID=America/New_York:20240921T180000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.665072+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Making Better Hacks: Faster with GitHub Copilot
-DTSTART;TZID=America/New_York:20240921T170000
-DTEND;TZID=America/New_York:20240921T180000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.665102+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:MLH Mini Event - Cup Stacking
-DTSTART;TZID=America/New_York:20240921T180000
-DTEND;TZID=America/New_York:20240921T190000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.665129+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Poker
-DTSTART;TZID=America/New_York:20240921T170000
-DTEND;TZID=America/New_York:20240921T180000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.665160+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Fire Noodles Challenge
-DTSTART;TZID=America/New_York:20240921T180000
-DTEND;TZID=America/New_York:20240921T183000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.665187+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Dinner
-DTSTART;TZID=America/New_York:20240921T190000
-DTEND;TZID=America/New_York:20240921T200000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.665213+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Karaoke + Rap Battle
-DTSTART;TZID=America/New_York:20240921T190000
-DTEND;TZID=America/New_York:20240921T203000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.665240+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Movie Night
-DTSTART;TZID=America/New_York:20240922T000000
-DTEND;TZID=America/New_York:20240922T003000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.665267+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Brunch
-DTSTART;TZID=America/New_York:20240922T080000
-DTEND;TZID=America/New_York:20240922T090000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.665293+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Project Submissions Due
-DTSTART;TZID=America/New_York:20240922T090000
-DTEND;TZID=America/New_York:20240922T090000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.665320+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Expo 1
-DTSTART;TZID=America/New_York:20240922T090000
-DTEND;TZID=America/New_York:20240922T093000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.665351+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Expo 2
-DTSTART;TZID=America/New_York:20240922T103000
-DTEND;TZID=America/New_York:20240922T113000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.665377+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Top 20 Judging
-DTSTART;TZID=America/New_York:20240922T120000
-DTEND;TZID=America/New_York:20240922T130000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.665404+00:00
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Closing Ceremony + Top 3 Presentations
-DTSTART;TZID=America/New_York:20240922T160000
-DTEND;TZID=America/New_York:20240922T160000
-DTSTAMP:20240921T155859Z
-X-DT-PYTZ:2024-09-21 15:58:59.665430+00:00
-END:VEVENT
-END:VCALENDAR
-"""
-
 # Route for handling the form submission
-
 @app.route("/submit", methods=["POST"])
 def submit():
-    # Handle file upload
-    file = request.files["image"]
-    if file:
-        filename = secure_filename(file.filename) 
+    uploaded_image = request.files.get("image", None)
+    ocr_text = None
+    if uploaded_image:
+        # Handle image upload
+        if uploaded_image.filename:
+            filename = secure_filename(uploaded_image.filename)
+        else:
+            filename = f"image.{uploaded_image.content_type.split('/')[-1]}"
         # add random string to filename to avoid overwriting
         file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-        file.save(file_path)
+        uploaded_image.save(file_path)
+        
+        # Compress the image to avoid base64 url length issues
+        with Image.open(file_path) as img:
+            img = img.convert('RGB')
+            img.save(file_path, format='JPEG', quality=50)  # Adjust quality as needed
 
         base64_img = image_to_base64(file_path)
         ocr_text = image_to_text(base64_img)
-
-        # Get the optional prompt from the user
-        prompt = request.form.get("prompt", "")
-
-        # Use CalendarAssistant to convert text into a .ics file
-        cal_assistant = CalendarAssistant()
-        cal_assistant.handle_user_message(ocr_text)
         print(f"OCR'd text: `{ocr_text}`")
-        if prompt:
-            cal_assistant.handle_user_message(ocr_text)  # Handle any prompt-related logic
-        ics_file = BytesIO(cal_assistant.to_ical_bytes())
-        calendar_name = cal_assistant.calendar_name
+    elif camera_image:
+        # Decode the base64 image data
+        header, encoded = camera_image.split(',', 1)  # Get rid of the data URL header
+        image_data = base64.b64decode(encoded)
 
-        # Send the .ics file back to the user for download
-        return send_file(
-            path_or_file=ics_file, as_attachment=True, download_name=f"{calendar_name}.ics"
-        )
+        # Save the image from camera
+        filename = "camera_image.png"  # You can generate a unique filename here
+        file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
 
-    return "No file uploaded", 400
+        with open(file_path, "wb") as f:
+            f.write(image_data)
+
+        # Compress and process the image
+        with Image.open(file_path) as img:
+            img = img.convert('RGB')
+            img.save(file_path, format='JPEG', quality=50)  # Adjust quality as needed
+
+        base64_img = image_to_base64(file_path)
+        ocr_text = image_to_text(base64_img)
+        print(f"OCR'd text from camera: `{ocr_text}`")
+
+    # Get the optional prompt from the user
+    user_prompt = request.form.get("prompt", "")
+
+    if ocr_text:
+        user_prompt += "\n"
+        prompt = f"{user_prompt}Scanned text:\n{ocr_text}"
+    else:
+        prompt = user_prompt
+    print(f"Prompt: `{prompt}`")
+
+    # Use CalendarAssistant to convert text into a .ics file
+    cal_assistant = CalendarAssistant()
+    cal_assistant.handle_user_message(prompt)
+    ics_file = BytesIO(cal_assistant.to_ical_bytes())
+    calendar_name = cal_assistant.calendar_name
+
+    save_path = os.path.join(app.config["UPLOAD_FOLDER"], f"{calendar_name}.ics")
+    cal_assistant.write_calendar(save_path)
+    
+    # Send the .ics file back to the user for download
+    return send_file(
+        path_or_file=ics_file, as_attachment=True, download_name=f"{calendar_name}.ics"
+    )

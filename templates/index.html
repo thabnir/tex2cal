@@ -1,73 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Image/Text to Calendar Converter</title>
-    <link rel="stylesheet" href="..\static\css\styles.css"> 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Shrikhand&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calendar Snap</title>
+  <link rel="stylesheet" href="static/css/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Shrikhand&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap" rel="stylesheet" />
 </head>
 
 <body>
-<script src="..\static\script.js"></script> 
-<script>
-    const video = document.getElementById('video');
-    const startCameraButton = document.getElementById('startCamera');
-    const captureButton = document.getElementById('capture');
-    const canvas = document.getElementById('canvas');
-    const cameraImageInput = document.getElementById('cameraImage');
-    const fileNameDisplay = document.getElementById('fileName');
-    startCameraButton.addEventListener('click', async () => {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        video.srcObject = stream;
-        video.style.display = 'block';
-        video.play();
-        captureButton.style.display = 'block';
-    });
-    captureButton.addEventListener('click', () => {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0);
-        const imageData = canvas.toDataURL('image/png');
-        cameraImageInput.value = imageData;
-        video.style.display = 'none';
-        captureButton.style.display = 'none';
-    });
-    function updateFileName(input) {
-        const fileName = input.files.length > 0 ? input.files[0].name : '';
-        fileNameDisplay.textContent = fileName ? `Selected file: ${fileName}` : 'No file selected';
-    }
-</script>
-<h1>TITLE </h1>
-<form action="/submit" method="POST" enctype="multipart/form-data">
+  <h1 id="title">Bazinga</h1>
+  <div id="splash"></div>
+  <form id="mainForm" action="/submit" method="POST" enctype="multipart/form-data">
+    <label for="upload">Select an image (JPEG/PNG):</label>
+    <input type="file" id="upload" name="image" accept="image/*" />
 
-    <label id="tagline">Add new events</label>
-    <input type="file" id="upload" name="image" accept="image/*" style="display: none;" />
+    <!-- <button type="button" onclick="document.getElementById('upload').click();">
+      Choose File
+    </button> -->
 
-    <div id="fileName" style="margin-bottom: 20px; font-weight: bold;"></div>
-    <button type="button" onclick="document.getElementById('upload').click();">Choose a file</button>
-    
-    <label>or</label>
-    <button type="button" id="startCamera">Take a pic!</button>
-    <video id="video" width="300" height="200" style="display: none;"></video>
-    <button type="button" id="capture" style="display: none;">Capture Photo</button>
-    <canvas id="canvas" style="display: none;"></canvas>
+    <label style="margin-top: 20px">Or use your camera:</label>
+    <button type="button" id="startCamera">Open Camera</button>
+    <video id="video" width="300" height="200" style="display: none"></video>
+    <button type="button" id="capture" style="display: none">
+      Capture Photo
+    </button>
+    <canvas id="canvas" style="display: none"></canvas>
     <input type="hidden" id="cameraImage" name="cameraImage" />
 
-    <label>Additional prompt or details</label>
-    <textarea id="prompt" name="prompt" rows="3"></textarea>
+    <label for="prompt">Optional: Enter any additional prompt or details:</label>
+    <textarea id="prompt" name="prompt" rows="4"></textarea>
+
+    <label style="margin-top: 20px">Or record your voice:</label>
+    <button type="button" id="startRecording">Start Recording</button>
+    <button type="button" id="stopRecording" style="display: none">
+      Stop Recording
+    </button>
 
     <button type="submit">Convert to Calendar</button>
-</form>
+  </form>
+  <script src="/static/js/script.js"></script>
 </body>
 
 </html>
-
-
-

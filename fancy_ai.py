@@ -40,7 +40,7 @@ class CalendarAssistant:
                 "role": "system",
                 # Assumes the events are in the same timezone as the calendar, which is the user's timezone.
                 # This is not necessarily true, but it's a reasonable assumption most of the time.
-                "content": f"You are a calendar-creating assistant. Generate a calendar including all events in the input and be sure to give it a useful name. If necessary, explain your decisions and assumptions in the text output. It is {today}.",
+                "content": f"You are a calendar-creating assistant. Generate a calendar including all events in the input and be sure to give it a useful name. It is {today}, and, all calendar events should be assumed to be near this date (only 2024 or later).",
             },
         ]
         self.tools = [

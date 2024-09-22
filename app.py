@@ -3,6 +3,7 @@ from io import BytesIO
 from flask import Flask, render_template, request, send_file
 from werkzeug.utils import secure_filename
 from fancy_ai import CalendarAssistant
+from whispy import transcribe_audio
 import os
 from img_to_text import image_to_text, image_to_base64
 from PIL import Image
@@ -24,6 +25,7 @@ def hello_world():
 @app.route("/submit", methods=["POST"])
 def submit():
     uploaded_image = request.files.get("image", None)
+    camera_image = request.form.get("camera_image", None)
     ocr_text = None
     if uploaded_image:
         # Handle image upload
@@ -58,11 +60,22 @@ def submit():
         # Compress and process the image
         with Image.open(file_path) as img:
             img = img.convert('RGB')
-            img.save(file_path, format='JPEG', quality=50)  # Adjust quality as needed
+            img.save(file_path, format='JPEG', quality=50)  # Adjust quality as necessary
 
         base64_img = image_to_base64(file_path)
         ocr_text = image_to_text(base64_img)
         print(f"OCR'd text from camera: `{ocr_text}`")
+        
+    audio = request.files.get("audio", None)
+    asr_text = None
+    if audio:
+        # Handle audio upload
+        audio_filename = secure_filename(audio.filename)
+        audio_path = os.path.join(app.config["UPLOAD_FOLDER"], audio_filename)
+        audio.save(audio_path)
+        print(f"Saved audio file to {audio_path}")
+        asr_text = transcribe_audio(audio_path)
+        print(f"asr_text: {asr_text}")
 
     # Get the optional prompt from the user
     user_prompt = request.form.get("prompt", "")
@@ -72,6 +85,13 @@ def submit():
         prompt = f"{user_prompt}Scanned text:\n{ocr_text}"
     else:
         prompt = user_prompt
+
+    if asr_text:
+        asr_text += "\n"
+        prompt = f"{asr_text}Transcribed text:\n{asr_text}"
+    else:
+        prompt = user_prompt
+
     print(f"Prompt: `{prompt}`")
 
     # Use CalendarAssistant to convert text into a .ics file
@@ -84,6 +104,8 @@ def submit():
     cal_assistant.write_calendar(save_path)
     
     # Send the .ics file back to the user for download
-    return send_file(
+    response = send_file(
         path_or_file=ics_file, as_attachment=True, download_name=f"{calendar_name}.ics"
     )
+    response.headers["X-Download-Name"] = f"{calendar_name}.ics"  # Custom header for JS to capture
+    return response

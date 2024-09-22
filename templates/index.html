@@ -15,9 +15,9 @@
             background-color: #f4f4f4;
             color: #333;
             display: flex;
-            flex-direction: column; /* Stack elements vertically */
-            align-items: center; /* Center items horizontally */
-            justify-content: flex-start; /* Align items to the top */
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
             height: 100vh;
             margin: 0;
             padding: 20px;
@@ -32,23 +32,25 @@
             width: 100%;
             max-width: 600px;
             display: flex;
-            flex-direction: column; /* Stack form elements vertically */
-            align-items: stretch; /* Make form elements take full width */
+            flex-direction: column;
+            align-items: center;
         }
 
         label {
             font-weight: bold;
             margin-bottom: 8px;
-            text-align: left; /* Align labels to the left */
+            text-align: left;
+            width: 100%;
         }
 
         input[type="file"],
         textarea {
-            width: 100%; /* Ensure inputs take full width */
+            width: calc(100% - 20px);
             margin-bottom: 20px;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            box-sizing: border-box;
         }
 
         button {
@@ -61,6 +63,7 @@
             font-size: 16px;
             transition: background-color 0.3s;
             width: 100%;
+            margin-bottom: 10px;
         }
 
         button:hover {
@@ -111,10 +114,8 @@
 </script>
 <h1>TITLE </h1>
 <form action="/submit" method="POST" enctype="multipart/form-data">
-    <!-- <label for="image">Select an image</label>
-    <input type="file" id="image" name="image" accept="image/*" required /> -->
 
-    <label for="upload">Select an image</label>
+    <label for="upload">Add new events</label>
     <input type="file" id="upload" name="image" accept="image/*" style="display: none;" />
 
     <div id="fileName" style="margin-bottom: 20px; font-weight: bold;"></div>
@@ -135,7 +136,6 @@
 </body>
 
 </html>
-
 
 
 

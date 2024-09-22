@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Image/Text to Calendar Converter</title>
-    <link rel="stylesheet" href="styles.css"> 
+    <link rel="stylesheet" href="..\static\css\styles.css"> 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Shrikhand&display=swap" rel="stylesheet">
@@ -29,7 +29,7 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            width: 100%;
+            width: 200%;
             max-width: 600px;
             display: flex;
             flex-direction: column;
@@ -39,7 +39,7 @@
         label {
             font-weight: bold;
             margin-bottom: 8px;
-            text-align: left;
+            text-align: center;
             width: 100%;
         }
 
@@ -62,7 +62,7 @@
             cursor: pointer;
             font-size: 16px;
             transition: background-color 0.3s;
-            width: 100%;
+            width: 50%;
             margin-bottom: 10px;
         }
 
@@ -121,7 +121,7 @@
     <div id="fileName" style="margin-bottom: 20px; font-weight: bold;"></div>
     <button type="button" onclick="document.getElementById('upload').click();">Choose a file</button>
     
-    <label style="text-align: center;">or</label>
+    <label>or</label>
     <button type="button" id="startCamera">Take a pic!</button>
     <video id="video" width="300" height="200" style="display: none;"></video>
     <button type="button" id="capture" style="display: none;">Capture Photo</button>

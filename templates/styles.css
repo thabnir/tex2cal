@@ -32,7 +32,8 @@ body {
         background-position: 0% 50%;
     }
 }
-  
+
+/* TITLE */
 #splash {
     width: 70vw;
     height: 50vh;
@@ -41,7 +42,10 @@ body {
     justify-content: center;
 }
 
-h1 {
+h1 { 
+    margin-bottom: 20px;
+    color: #ded1d1;
+    width: 100%; /* Full width for centering */
     font-size: 70px;
     text-align: center;
     line-height: 1.2;
@@ -50,6 +54,6 @@ h1 {
 }
 
 #title {
-    color: #F4EBCF;
+    color: #e35339;
     text-shadow: 10px 10px #EB492C;
 }

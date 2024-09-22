@@ -30,17 +30,17 @@ class CalendarAssistant:
 
         self.timezone = ZoneInfo("America/New_York")  # default to eastern time
         today = (
-            datetime.today().astimezone(self.timezone).strftime("%A, %B %d, %Y")
+            datetime.today().astimezone(self.timezone).strftime("%A, %B %d, %Y - %H:%M")
         )  # Weekday, Month Day, Year
 
-        context = "the user's existing calendar. TODO: figure out how to get the user's existing calendar"
+        # context = "the user's existing calendar. TODO: figure out how to get the user's existing calendar"
 
         self.messages = [
             {
                 "role": "system",
                 # Assumes the events are in the same timezone as the calendar, which is the user's timezone.
                 # This is not necessarily true, but it's a reasonable assumption most of the time.
-                "content": f"You are a calendar-creating assistant. Generate a calendar including all events in the input and give it a useful name. Today's date is {today}. ",
+                "content": f"You are a calendar-creating assistant. Generate a calendar including all events in the input and be sure to give it a useful name. If necessary, explain your decisions and assumptions in the text output. any Today is {today}.",
             },
         ]
         self.tools = [
@@ -235,82 +235,3 @@ def add_event_to_calendar(
         event.add("organizer", organizer_email)
 
     calendar.add_component(event)
-
-
-example_str = """
-# Sep 12 - OS Shell Assignment Released
-# Sep 17 - Scheduling Assignment Released
-# Oct 3 - Virtual Memory (2/3)
-# Oct 10 - Mid-semester Q&A (no lab)
-# Oct 15 - Graded Exercises Released
-# Oct 18 - A1 Graded
-# Oct 24 - OS Shell Assignment Due
-# Oct 25 - A2 Graded
-# Nov 7 - Gradied Exercises Due
-# Nov 14 - Exercises Graded
-# Nov 28 - A3 Graded
-# Dec 3 - End-of-Semester Q&A (Final class)
-# Dec 6 - Last class
-# Dec 8 - Memory Management Assign. Due
-# Dec 9 - A4 Graded
-# Dec 14 - Midterm Exam Grade Posted
-# """
-
-penn_apps_schedule = """
-Bag Check: 09/20/2024: 2:00:00 PM to 3:00:00 PM
-Hacker Check-in: 09/20/2024: 3:00:00 PM to 5:00:00 PM
-Sponsor/Mentor Check-in: 09/20/2024: 3:00:00 PM to 5:30:00 PM
-Opening Ceremony: 09/20/2024: 5:00:00 PM to 7:00:00 PM
-Mentorship Lounge Opens: 09/20/2024: 7:00:00 PM to 7:30:00 PM
-Diversity Fellows Welcome Event: 09/20/2024: 7:00:00 PM to 7:30:00 PM
-Sponsor Fair: 09/20/2024: 7:00:00 PM to 9:00:00 PM
-Hardware Lab Open: 09/20/2024: 7:00:00 PM to 9:30:00 PM
-Dinner: 09/20/2024: 7:30:00 PM to 8:30:00 PM
-Team Formation: 09/20/2024: 8:30:00 PM to 9:30:00 PM
-Hacking Begins: 09/20/2024: 9:00:00 PM to 10:00:00 PM
-Patient Safety 101: 09/20/2024: 9:00:00 PM to 10:00:00 PM
-Building ChatGPT... But You Tester with Cerebras API: 09/20/2024: 9:30:00 PM to 10:30:00 PM
-Mario Kart Tournament: 09/20/2024: 10:00:00 PM to 11:00:00 PM
-Air Mattress Checkout: 09/20/2024: 10:00:00 PM to 11:00:00 PM
-Reading Room Opens: 09/20/2024: 11:00:00 PM to 11:00:00 PM
-
-
-Hardware Lab Open: 09/21/2024: 05:30:00 AM to 07:00:00 PM
-Penn Labs Presents: Intro to IOS: 09/21/2024: 08:30:00 AM to 09:30:00 AM
-Diversity Fellows - Guide to Networking Workshop: 09/21/2024: 09:30:00 AM to 10:30:00 AM
-Diversity Fellows Sponsor Networking Brunch: 09/21/2024: 10:30:00 AM to 11:30:00 AM
-Brunch: 09/21/2024: 10:30:00 AM to 11:30:00 AM
-Intro to Bloomberg: 09/21/2024: 11:30:00 AM to 12:30:00 PM
-Campus Tour: 09/21/2024: 11:45:00 AM to 12:45:00 PM
-Hatz AI Workshop: 09/21/2024: 1:00:00 PM to 2:00:00 PM
-Roboflow Workshop: 09/21/2024: 1:00:00 PM to 2:00:00 PM
-Diversity Fellows - Career Panel: 09/21/2024: 1:45:00 PM to 2:45:00 PM
-Mastering LLM Application Development with Fine Studio's TuringQ: 09/21/2024: 2:00:00 PM to 3:00:00 PM
-
-
-"Wearable Gaming Session - SIG: 9/21/2024: 3:00 PM to 4:00 PM"
-"Build with Palantir: 9/21/2024: 4:00 PM to 5:00 PM"
-"Intro to GPU Programming: 9/21/2024: 4:00 PM to 5:00 PM"
-"Intro to GitHub Actions and CI/CD Development: 9/21/2024: 5:00 PM to 6:00 PM"
-"Making Better Hacks: Faster with GitHub Copilot: 9/21/2024: 5:00 PM to 6:00 PM"
-"MLH Mini Event - Cup Stacking: 9/21/2024: 6:00 PM to 7:00 PM"
-"Dinner: 9/21/2024: 7:00 PM to 8:00 PM"
-"Poker: 9/21/2024: 5:00 PM to 6:00 PM"
-"Fire Noodles Challenge: 9/21/2024: 6:00 PM to 6:30 PM"
-"Karaoke + Rap Battle: 9/21/2024: 7:00 PM to 8:30 PM"
-"Movie Night: 9/21/2024: 12:00 AM to 12:30 AM"
-
-
-Brunch: 9/22/2024: 8:00 AM to 9:00 AM
-Project Submissions Due: 9/22/2024: 9:00 AM to 9:00 AM
-Expo 1: 9/22/2024: 9:00 AM to 9:30 AM
-Expo 2: 9/22/2024: 10:30 AM to 11:30 AM
-Top 20 Judging: 9/22/2024: 12:00 PM to 1:00 PM
-Closing Ceremony + Top 3 Presentations: 9/22/2024: 4:00 PM to 4:00 PM
-"""
-
-# cal_assistant = CalendarAssistant()
-
-# cal_assistant.handle_user_message(penn_apps_schedule)
-
-# cal_assistant.save_calendar()

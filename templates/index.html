@@ -11,9 +11,9 @@
             background-color: #f4f4f4;
             color: #333;
             display: flex;
-            flex-direction: column; /* Stack elements vertically */
-            align-items: center; /* Center items horizontally */
-            justify-content: flex-start; /* Align items to the top */
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
             height: 100vh;
             margin: 0;
             padding: 20px;
@@ -23,7 +23,7 @@
         h1 {
             margin-bottom: 20px;
             color: #4A90E2;
-            width: 100%; /* Full width for centering */
+            width: 100%;
         }
 
         form {
@@ -34,23 +34,25 @@
             width: 100%;
             max-width: 400px;
             display: flex;
-            flex-direction: column; /* Stack form elements vertically */
-            align-items: stretch; /* Make form elements take full width */
+            flex-direction: column;
+            align-items: center;
         }
 
         label {
             font-weight: bold;
             margin-bottom: 8px;
-            text-align: left; /* Align labels to the left */
+            text-align: left;
+            width: 100%;
         }
 
         input[type="file"],
         textarea {
-            width: 100%; /* Ensure inputs take full width */
+            width: calc(100% - 20px);
             margin-bottom: 20px;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            box-sizing: border-box;
         }
 
         button {
@@ -63,10 +65,24 @@
             font-size: 16px;
             transition: background-color 0.3s;
             width: 100%;
+            margin-bottom: 10px;
         }
 
         button:hover {
             background-color: #357ABD;
+        }
+
+        .capture-button {
+            background-color: #5cb85c;
+        }
+
+        .capture-button:hover {
+            background-color: #4cae4c;
+        }
+
+        #fileName {
+            margin-top: 10px;
+            font-weight: bold;
         }
 
         @media (max-width: 600px) {
@@ -84,18 +100,59 @@
 <body>
 <h1>Upload an Image to Convert into Calendar Events</h1>
 <form action="/submit" method="POST" enctype="multipart/form-data">
-    <label for="image">Select an image (JPEG/PNG):</label>
-    <input type="file" id="image" name="image" accept="image/*" required />
+    <label for="upload">Select an image (JPEG/PNG):</label>
+    <input type="file" id="upload" name="image" accept="image/*" style="display: none;" onchange="updateFileName(this)" />
+    <div id="fileName" style="margin-bottom: 20px; font-weight: bold;"></div>
+
+    <button type="button" onclick="document.getElementById('upload').click();">Choose File</button>
+
+    <label style="margin-top: 20px;">Or use your camera:</label>
+    <button type="button" id="startCamera">Open Camera</button>
+    <video id="video" width="300" height="200" style="display: none;"></video>
+    <button type="button" id="capture" style="display: none;">Capture Photo</button>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <input type="hidden" id="cameraImage" name="cameraImage" />
 
     <label for="prompt">Optional: Enter any additional prompt or details:</label>
     <textarea id="prompt" name="prompt" rows="4"></textarea>
 
     <button type="submit">Convert to Calendar</button>
 </form>
+
+<script>
+    const video = document.getElementById('video');
+    const startCameraButton = document.getElementById('startCamera');
+    const captureButton = document.getElementById('capture');
+    const canvas = document.getElementById('canvas');
+    const cameraImageInput = document.getElementById('cameraImage');
+    const fileNameDisplay = document.getElementById('fileName');
+
+    startCameraButton.addEventListener('click', async () => {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        video.style.display = 'block';
+        video.play();
+        captureButton.style.display = 'block';
+    });
+
+    captureButton.addEventListener('click', () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        const imageData = canvas.toDataURL('image/png');
+        cameraImageInput.value = imageData;
+        video.style.display = 'none';
+        captureButton.style.display = 'none';
+    });
+
+    function updateFileName(input) {
+        const fileName = input.files.length > 0 ? input.files[0].name : '';
+        fileNameDisplay.textContent = fileName ? `Selected file: ${fileName}` : 'No file selected';
+    }
+</script>
 </body>
 
 </html>
-
 
 
 

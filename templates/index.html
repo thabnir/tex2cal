@@ -9,81 +9,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Shrikhand&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            height: 100vh;
-            margin: 0;
-            padding: 20px;
-            text-align: center;
-        }
-
-        form {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            width: 200%;
-            max-width: 600px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        label {
-            font-weight: bold;
-            margin-bottom: 8px;
-            text-align: center;
-            width: 100%;
-        }
-
-        input[type="file"],
-        textarea {
-            width: calc(100% - 20px);
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-        button {
-            background-color: #23a6d5;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 10px 15px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-            width: 50%;
-            margin-bottom: 10px;
-        }
-
-        button:hover {
-            background-color: rgb(52, 153, 211);
-        }
-
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 24px;
-            }
-
-            button {
-                font-size: 14px;
-            }
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
 </head>
 
 <body>
-<script src="script.js"></script> 
+<script src="..\static\script.js"></script> 
 <script>
     const video = document.getElementById('video');
     const startCameraButton = document.getElementById('startCamera');
@@ -115,7 +47,7 @@
 <h1>TITLE </h1>
 <form action="/submit" method="POST" enctype="multipart/form-data">
 
-    <label for="upload">Add new events</label>
+    <label id="tagline">Add new events</label>
     <input type="file" id="upload" name="image" accept="image/*" style="display: none;" />
 
     <div id="fileName" style="margin-bottom: 20px; font-weight: bold;"></div>
@@ -128,7 +60,7 @@
     <canvas id="canvas" style="display: none;"></canvas>
     <input type="hidden" id="cameraImage" name="cameraImage" />
 
-    <label for="prompt">Additional prompt or details</label>
+    <label>Additional prompt or details</label>
     <textarea id="prompt" name="prompt" rows="3"></textarea>
 
     <button type="submit">Convert to Calendar</button>

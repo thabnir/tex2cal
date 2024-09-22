@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 
 <head>
     <meta charset="UTF-8" />
@@ -50,24 +50,31 @@
     <label id="tagline">Never miss a date (again)</label>
     <input type="file" id="upload" name="image" accept="image/*" style="display: none;" />
 
-    <div id="fileName" style="margin-bottom: 20px; font-weight: bold;"></div>
-    <button type="button" onclick="document.getElementById('upload').click();">Choose a file</button>
-    
-    <label>or</label>
-    <button type="button" id="startCamera">Take a pic!</button>
-    <video id="video" width="300" height="200" style="display: none;"></video>
-    <button type="button" id="capture" style="display: none;">Capture Photo</button>
-    <canvas id="canvas" style="display: none;"></canvas>
+    <!-- <button type="button" onclick="document.getElementById('upload').click();">
+      Choose File
+    </button> -->
+
+    <label style="margin-top: 20px">Or use your camera:</label>
+    <button type="button" id="startCamera">Open Camera</button>
+    <video id="video" width="300" height="200" style="display: none"></video>
+    <button type="button" id="capture" style="display: none">
+      Capture Photo
+    </button>
+    <canvas id="canvas" style="display: none"></canvas>
     <input type="hidden" id="cameraImage" name="cameraImage" />
 
-    <label>Additional prompt or details</label>
-    <textarea id="prompt" name="prompt" rows="3"></textarea>
+    <label for="prompt">Optional: Enter any additional prompt or details:</label>
+    <textarea id="prompt" name="prompt" rows="4"></textarea>
+
+    <label style="margin-top: 20px">Or record your voice:</label>
+    <button type="button" id="startRecording">Start Recording</button>
+    <button type="button" id="stopRecording" style="display: none">
+      Stop Recording
+    </button>
 
     <button type="submit">Add to Calendar</button>
-</form>
+  </form>
+  <script src="/static/js/script.js"></script>
 </body>
 
 </html>
-
-
-

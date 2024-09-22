@@ -1,3 +1,4 @@
+import base64
 from io import BytesIO
 from flask import Flask, render_template, request, send_file
 from werkzeug.utils import secure_filename
@@ -337,6 +338,7 @@ END:VCALENDAR
 @app.route("/submit", methods=["POST"])
 def submit():
     uploaded_image = request.files["image"]
+    camera_image = request.form.get("cameraImage")
     ocr_text = None
     if uploaded_image:
         # Handle image upload
@@ -356,6 +358,26 @@ def submit():
         base64_img = image_to_base64(file_path)
         ocr_text = image_to_text(base64_img)
         print(f"OCR'd text: `{ocr_text}`")
+    elif camera_image:
+        # Decode the base64 image data
+        header, encoded = camera_image.split(',', 1)  # Get rid of the data URL header
+        image_data = base64.b64decode(encoded)
+
+        # Save the image from camera
+        filename = "camera_image.png"  # You can generate a unique filename here
+        file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+
+        with open(file_path, "wb") as f:
+            f.write(image_data)
+
+        # Compress and process the image
+        with Image.open(file_path) as img:
+            img = img.convert('RGB')
+            img.save(file_path, format='JPEG', quality=50)  # Adjust quality as needed
+
+        base64_img = image_to_base64(file_path)
+        ocr_text = image_to_text(base64_img)
+        print(f"OCR'd text from camera: `{ocr_text}`")
 
     # Get the optional prompt from the user
     user_prompt = request.form.get("prompt", "")

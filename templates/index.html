@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Image/Text to Calendar Converter</title>
-    <style>
+    <style type="text/css">
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -72,19 +72,6 @@
             background-color: #357ABD;
         }
 
-        .capture-button {
-            background-color: #5cb85c;
-        }
-
-        .capture-button:hover {
-            background-color: #4cae4c;
-        }
-
-        #fileName {
-            margin-top: 10px;
-            font-weight: bold;
-        }
-
         @media (max-width: 600px) {
             h1 {
                 font-size: 24px;
@@ -95,14 +82,14 @@
             }
         }
     </style>
+    <!--<link rel="stylesheet" type="text/css" href="main.css" /> -->
 </head>
 
 <body>
 <h1>Upload an Image to Convert into Calendar Events</h1>
 <form action="/submit" method="POST" enctype="multipart/form-data">
     <label for="upload">Select an image (JPEG/PNG):</label>
-    <input type="file" id="upload" name="image" accept="image/*" style="display: none;" onchange="updateFileName(this)" />
-    <div id="fileName" style="margin-bottom: 20px; font-weight: bold;"></div>
+    <input type="file" id="upload" name="image" accept="image/*" style="display: none;" />
 
     <button type="button" onclick="document.getElementById('upload').click();">Choose File</button>
 
@@ -116,6 +103,10 @@
     <label for="prompt">Optional: Enter any additional prompt or details:</label>
     <textarea id="prompt" name="prompt" rows="4"></textarea>
 
+    <button type="button" id="startRecording">Start Recording</button>
+    <button type="button" id="stopRecording" style="display: none;">Stop Recording</button>
+    <a id="downloadLink" style="display: none;">Download Recording</a>
+
     <button type="submit">Convert to Calendar</button>
 </form>
 
@@ -125,7 +116,8 @@
     const captureButton = document.getElementById('capture');
     const canvas = document.getElementById('canvas');
     const cameraImageInput = document.getElementById('cameraImage');
-    const fileNameDisplay = document.getElementById('fileName');
+    const startRecordingButton = document.getElementById('startRecording');
+    const stopRecordingButton = document.getElementById('stopRecording');
 
     startCameraButton.addEventListener('click', async () => {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -145,14 +137,59 @@
         captureButton.style.display = 'none';
     });
 
-    function updateFileName(input) {
-        const fileName = input.files.length > 0 ? input.files[0].name : '';
-        fileNameDisplay.textContent = fileName ? `Selected file: ${fileName}` : 'No file selected';
-    }
+    // Audio recording functionality
+    startRecordingButton.addEventListener('click', async () => {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+
+        mediaRecorder.ondataavailable = (event) => {
+            audioChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            audioChunks = [];
+
+            // Create FormData object to send audio along with other form data
+            const formData = new FormData(document.getElementById('mainForm'));
+            formData.append('audio', audioBlob, 'recording.wav');
+
+            // Send the FormData via POST request
+            fetch('/submit', {
+                method: 'POST',
+                body: formData,
+            })
+                .then(response => response.blob())
+                .then(blob => {
+                    // Handle response if needed (e.g., download the returned .ics file)
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'calendar_events.ics'; // Change to appropriate filename
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                })
+                .catch(error => console.error('Error:', error));
+        };
+
+        mediaRecorder.start();
+        startRecordingButton.style.display = 'none';
+        stopRecordingButton.style.display = 'block';
+    });
+
+    stopRecordingButton.addEventListener('click', () => {
+        mediaRecorder.stop();
+        startRecordingButton.style.display = 'block';
+        stopRecordingButton.style.display = 'none';
+    });
 </script>
 </body>
 
 </html>
+
+
+
 
 
 

@@ -182,7 +182,7 @@ class CalendarAssistant:
         end_time = end_time.astimezone(self.timezone)
 
         print(
-            f"Event {args['summary']} from {start_time.strftime("('%A, %B %d, %Y %I:%M %p')")} to {end_time.strftime("('%A, %B %d, %Y %I:%M %p')")}"
+            f"Event {args['summary']} from {start_time.strftime('(%A, %B %d, %Y %I:%M %p)')} to {end_time.strftime('(%A, %B %d, %Y %I:%M %p)')}"
         )
 
         args["start_time"] = start_time

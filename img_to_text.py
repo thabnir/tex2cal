@@ -71,7 +71,7 @@ def image_to_events(img_path):
 
     return list_of_deadlines
 
-# image_to_events("Weixin Image_20240921170839.jpg")
+image_to_events("pennapps_friday.png")
 
 
 

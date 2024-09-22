@@ -1,3 +1,36 @@
+const video = document.getElementById('video');
+const startCameraButton = document.getElementById('startCamera');
+const captureButton = document.getElementById('capture');
+const canvas = document.getElementById('canvas');
+const cameraImageInput = document.getElementById('cameraImage');
+const fileNameDisplay = document.getElementById('fileName');
+
+startCameraButton.addEventListener('click', async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+    video.style.display = 'block';
+    video.play();
+    captureButton.style.display = 'block';
+});
+
+captureButton.addEventListener('click', () => {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    const imageData = canvas.toDataURL('image/png');
+    cameraImageInput.value = imageData;
+    video.style.display = 'none';
+    captureButton.style.display = 'none';
+});
+
+function updateFileName(input) {
+    const fileName = input.files.length > 0 ? input.files[0].name : '';
+    fileNameDisplay.textContent = fileName ? `Selected file: ${fileName}` : 'No file selected';
+}
+
+
+// SHADOW STUFF
+
 const container = document.getElementById('splash');
 const text = document.getElementById('title');
 

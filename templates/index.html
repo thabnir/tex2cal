@@ -5,6 +5,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Image/Text to Calendar Converter</title>
+    <link rel="stylesheet" href="styles.css"> 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Shrikhand&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -20,19 +24,13 @@
             text-align: center;
         }
 
-        h1 {
-            margin-bottom: 20px;
-            color: #4A90E2;
-            width: 100%;
-        }
-
         form {
             background: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 400px;
+            max-width: 600px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -56,7 +54,7 @@
         }
 
         button {
-            background-color: #4A90E2;
+            background-color: #23a6d5;
             color: white;
             border: none;
             border-radius: 4px;
@@ -69,20 +67,7 @@
         }
 
         button:hover {
-            background-color: #357ABD;
-        }
-
-        .capture-button {
-            background-color: #5cb85c;
-        }
-
-        .capture-button:hover {
-            background-color: #4cae4c;
-        }
-
-        #fileName {
-            margin-top: 10px;
-            font-weight: bold;
+            background-color: rgb(52, 153, 211);
         }
 
         @media (max-width: 600px) {
@@ -98,27 +83,7 @@
 </head>
 
 <body>
-<h1>Upload an Image to Convert into Calendar Events</h1>
-<form action="/submit" method="POST" enctype="multipart/form-data">
-    <label for="upload">Select an image (JPEG/PNG):</label>
-    <input type="file" id="upload" name="image" accept="image/*" style="display: none;" onchange="updateFileName(this)" />
-    <div id="fileName" style="margin-bottom: 20px; font-weight: bold;"></div>
-
-    <button type="button" onclick="document.getElementById('upload').click();">Choose File</button>
-
-    <label style="margin-top: 20px;">Or use your camera:</label>
-    <button type="button" id="startCamera">Open Camera</button>
-    <video id="video" width="300" height="200" style="display: none;"></video>
-    <button type="button" id="capture" style="display: none;">Capture Photo</button>
-    <canvas id="canvas" style="display: none;"></canvas>
-    <input type="hidden" id="cameraImage" name="cameraImage" />
-
-    <label for="prompt">Optional: Enter any additional prompt or details:</label>
-    <textarea id="prompt" name="prompt" rows="4"></textarea>
-
-    <button type="submit">Convert to Calendar</button>
-</form>
-
+<script src="script.js"></script> 
 <script>
     const video = document.getElementById('video');
     const startCameraButton = document.getElementById('startCamera');
@@ -126,7 +91,6 @@
     const canvas = document.getElementById('canvas');
     const cameraImageInput = document.getElementById('cameraImage');
     const fileNameDisplay = document.getElementById('fileName');
-
     startCameraButton.addEventListener('click', async () => {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         video.srcObject = stream;
@@ -134,7 +98,6 @@
         video.play();
         captureButton.style.display = 'block';
     });
-
     captureButton.addEventListener('click', () => {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
@@ -144,12 +107,32 @@
         video.style.display = 'none';
         captureButton.style.display = 'none';
     });
-
     function updateFileName(input) {
         const fileName = input.files.length > 0 ? input.files[0].name : '';
         fileNameDisplay.textContent = fileName ? `Selected file: ${fileName}` : 'No file selected';
     }
 </script>
+<h1>TITLE </h1>
+<form action="/submit" method="POST" enctype="multipart/form-data">
+
+    <label for="upload">Add new events</label>
+    <input type="file" id="upload" name="image" accept="image/*" style="display: none;" />
+
+    <div id="fileName" style="margin-bottom: 20px; font-weight: bold;"></div>
+    <button type="button" onclick="document.getElementById('upload').click();">Choose a file</button>
+    
+    <label style="text-align: center;">or</label>
+    <button type="button" id="startCamera">Take a pic!</button>
+    <video id="video" width="300" height="200" style="display: none;"></video>
+    <button type="button" id="capture" style="display: none;">Capture Photo</button>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <input type="hidden" id="cameraImage" name="cameraImage" />
+
+    <label for="prompt">Additional prompt or details</label>
+    <textarea id="prompt" name="prompt" rows="3"></textarea>
+
+    <button type="submit">Convert to Calendar</button>
+</form>
 </body>
 
 </html>
